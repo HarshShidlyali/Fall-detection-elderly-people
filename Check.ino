@@ -18,8 +18,6 @@ const String CHAT_ID  = "1640526464";
 
 // ---------------- MPU6050 ----------------
 MPU6050 mpu;
-bool alertAlreadySent = false;
-
 
 // calibration offsets
 long ax_off = 0, ay_off = 0, az_off = 0;
@@ -27,13 +25,15 @@ long gx_off = 0, gy_off = 0, gz_off = 0;
 
 bool alertSent = false;
 
-// previous values for SYNC
+// sync previous values
 float prevAx = 0, prevAy = 0, prevAz = 0;
 
 
-// ----------- CALIBRATION FUNCTION -------------
+// ============================================================
+//                  CALIBRATE MPU6050
+// ============================================================
 void calibrateMPU() {
-  Serial.println("Calibrating MPU6050... keep device still.");
+  Serial.println("Calibrating MPU6050... Keep device still.");
 
   const int samples = 500;
   long ax_sum = 0, ay_sum = 0, az_sum = 0;
@@ -45,7 +45,7 @@ void calibrateMPU() {
 
     ax_sum += axr;
     ay_sum += ayr;
-    az_sum += (azr - 16384);  // remove gravity (1g)
+    az_sum += (azr - 16384);  
     gx_sum += gxr;
     gy_sum += gyr;
     gz_sum += gzr;
@@ -56,15 +56,18 @@ void calibrateMPU() {
   ax_off = ax_sum / samples;
   ay_off = ay_sum / samples;
   az_off = az_sum / samples;
+
   gx_off = gx_sum / samples;
   gy_off = gy_sum / samples;
   gz_off = gz_sum / samples;
 
-  Serial.println("Calibration done.");
+  Serial.println("Calibration Complete.");
 }
 
 
-// ----------- READ MPU FUNCTION -------------
+// ============================================================
+//                  READ MPU VALUES
+// ============================================================
 void readMPU(float &ax, float &ay, float &az, float &gx, float &gy, float &gz) {
   int16_t axr, ayr, azr, gxr, gyr, gzr;
   mpu.getMotion6(&axr, &ayr, &azr, &gxr, &gyr, &gzr);
@@ -79,8 +82,10 @@ void readMPU(float &ax, float &ay, float &az, float &gx, float &gy, float &gz) {
 }
 
 
-// ----------- TELEGRAM FUNCTION -------------
-void sendTelegramAlert(String message) {
+// ============================================================
+//                SEND TELEGRAM MESSAGE
+// ============================================================
+void sendTelegramAlert(String msg) {
   WiFiClientSecure client;
   client.setInsecure();
 
@@ -88,7 +93,7 @@ void sendTelegramAlert(String message) {
   https.begin(client, "https://api.telegram.org/bot" + BOTtoken + "/sendMessage");
   https.addHeader("Content-Type", "application/json");
 
-  String payload = "{\"chat_id\":\"" + CHAT_ID + "\",\"text\":\"" + message + "\"}";
+  String payload = "{\"chat_id\":\"" + CHAT_ID + "\",\"text\":\"" + msg + "\"}";
   https.POST(payload);
   https.end();
 
@@ -96,66 +101,16 @@ void sendTelegramAlert(String message) {
 }
 
 
-// ----------- ACC THRESHOLD CHECK -------------
-bool fetchACCThresholdAndCheck(float accA, float accB, float accC, float accD, float accE) {
+// ============================================================
+//         CHECK ACC MATCH WITH GOOGLE SHEET THRESHOLD
+// ============================================================
+bool fetchACCThresholdAndCheck(float A, float B, float C, float D, float E) {
 
   HTTPClient http;
   http.begin(SCRIPT_BASE_URL + "?type=ACC");
 
   int code = http.GET();
-  if (code != 200) {
-    Serial.println("Error loading ACC dataset");
-    return false;
-  }
-
-  String payload = http.getString();
-  http.end();
-
-  DynamicJsonDocument doc(6000);
-  if (deserializeJson(doc, payload)) {
-    Serial.println("JSON parse error!");
-    return false;
-  }
-
-  JsonArray arr = doc.as<JsonArray>();
-  if (arr.size() == 0) {
-    Serial.println("Dataset empty.");
-    return false;
-  }
-
-  // ------------ TEST MODE: ONLY FIRST ROW ------------
-  JsonObject row = arr[0];
-
-  float thrA = row["accA"];
-  float thrB = row["accB"];
-  float thrC = row["accC"];
-  float thrD = row["accD"];
-  float thrE = row["accE"];
-
-  // PRINT THE THRESHOLD YOU ARE USING (GOOD FOR CHECKING)
-  Serial.print("Testing Against → A:");
-  Serial.print(thrA);
-  Serial.print(" B:");
-  Serial.print(thrB);
-  Serial.print(" C:");
-  Serial.print(thrC);
-  Serial.print(" D:");
-  Serial.print(thrD);
-  Serial.print(" E:");
-  Serial.println(thrE);
-
-  // ------------ TRIGGER CONDIT
-
-
-
-// ----------- SYNC THRESHOLD CHECK -------------
-bool fetchSYNCThresholdAndCheck(float X, float Y, float Z) {
-
-  HTTPClient http;
-  http.begin(SCRIPT_BASE_URL + "?type=SYNC");
-
-  int code = http.GET();
-  if (code != 200) { http.end(); return false; }
+  if (code != 200) return false;
 
   String payload = http.getString();
   http.end();
@@ -164,75 +119,114 @@ bool fetchSYNCThresholdAndCheck(float X, float Y, float Z) {
   deserializeJson(doc, payload);
 
   for (JsonObject row : doc.as<JsonArray>()) {
+
+    float tA = row["accA"];
+    float tB = row["accB"];
+    float tC = row["accC"];
+    float tD = row["accD"];
+    float tE = row["accE"];
+
+    if (A > tA || B > tB || C > tC || D > tD || E > tE) {
+
+      Serial.println("---- ACC Threshold Triggered ----");
+      Serial.println(String("A:") + tA + "  B:" + tB + "  C:" + tC);
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+// ============================================================
+//        CHECK SYNC (ΔACC) MATCH WITH GOOGLE THRESHOLD
+// ============================================================
+bool fetchSYNCThresholdAndCheck(float X, float Y, float Z) {
+
+  HTTPClient http;
+  http.begin(SCRIPT_BASE_URL + "?type=SYNC");
+
+  int code = http.GET();
+  if (code != 200) return false;
+
+  String payload = http.getString();
+  http.end();
+
+  DynamicJsonDocument doc(20000);
+  deserializeJson(doc, payload);
+
+  for (JsonObject row : doc.as<JsonArray>()) {
+
     float tX = row["SYN_X"];
     float tY = row["SYN_Y"];
     float tZ = row["SYN_Z"];
 
     if (abs(X) > tX || abs(Y) > tY || abs(Z) > tZ) {
-      Serial.println("🔔 SYNC Trigger:");
-      Serial.println(String("SYN_X: ") + tX + " SYN_Y: " + tY + " SYN_Z: " + tZ);
+
+      Serial.println("---- SYNC Threshold Triggered ----");
+      Serial.println(String("X:") + tX + "  Y:" + tY + "  Z:" + tZ);
+
       return true;
     }
   }
+
   return false;
 }
 
 
-// ================= SETUP =================
+// ============================================================
+//                     SETUP
+// ============================================================
 void setup() {
   Serial.begin(115200);
-  WiFi.begin(ssid, password);
 
+  WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
+
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    delay(400);
     Serial.print(".");
   }
-  Serial.println("\nWiFi Connected!");
+  Serial.println("\nWiFi Connected.");
 
-  // MPU6050 INIT
   Wire.begin();
   mpu.initialize();
 
   if (!mpu.testConnection()) {
-    Serial.println("MPU6050 connection failed!");
+    Serial.println("MPU6050 Connection Failed!");
     while (1);
   }
 
   calibrateMPU();
-  sendTelegramAlert("🚀 ESP32 Started & Calibrated!");
+  sendTelegramAlert("🚀 ESP32 Started & MPU6050 Calibrated");
 }
 
 
-// ================= LOOP =================
+// ============================================================
+//                     LOOP
+// ============================================================
 void loop() {
 
   float ax, ay, az, gx, gy, gz;
   readMPU(ax, ay, az, gx, gy, gz);
 
-  // Print live MPU values
-  Serial.print("ACC → ");
-  Serial.print(ax); Serial.print(", ");
-  Serial.print(ay); Serial.print(", ");
-  Serial.print(az);
-  Serial.print(" | GYRO → ");
-  Serial.print(gx); Serial.print(", ");
-  Serial.print(gy); Serial.print(", ");
-  Serial.println(gz);
+  // Compute sync (Δacc)
+  float synX = ax - prevAx;
+  float synY = ay - prevAy;
+  float synZ = az - prevAz;
 
-  // Map values (your ACC features)
-  float accA = ax;
-  float accB = ay;
-  float accC = az;
-  float accD = gx;
-  float accE = gy;
+  prevAx = ax;
+  prevAy = ay;
+  prevAz = az;
 
-  bool testTrigger = fetchACCThresholdAndCheck(accA, accB, accC, accD, accE);
+  bool accHit  = fetchACCThresholdAndCheck(ax, ay, az, gx, gy);
+  bool syncHit = fetchSYNCThresholdAndCheck(synX, synY, synZ);
 
-  if (testTrigger && !alertAlreadySent) {
-    sendTelegramAlert("🔥 TEST FALL DETECTED! — Threshold exceeded");
-    alertAlreadySent = true;
+  if (!alertSent && (accHit || syncHit)) {
+    sendTelegramAlert("⚠️ FALL DETECTED\nThreshold Exceeded in Dataset!");
+    alertSent = true;
   }
 
-  delay(300);
+  delay(200);
 }
