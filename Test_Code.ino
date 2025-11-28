@@ -97,35 +97,33 @@ void sendTelegramAlert(String message) {
 
 
 // ----------- ACC THRESHOLD CHECK -------------
-bool fetchACCThresholdAndCheck(float A, float B, float C, float D, float E) {
+bool fetchACCThresholdAndCheck(float A, float B, float C, float D) {
 
   HTTPClient http;
   http.begin(SCRIPT_BASE_URL + "?type=ACC");
 
-  int code = http.GET();
-  if (code != 200) { http.end(); return false; }
+  if (http.GET() != 200) return false;
 
   String payload = http.getString();
   http.end();
 
-  DynamicJsonDocument doc(20000);
+  DynamicJsonDocument doc(2000);
   deserializeJson(doc, payload);
 
-  for (JsonObject row : doc.as<JsonArray>()) {
-    float tA = row["accA"];
-    float tB = row["accB"];
-    float tC = row["accC"];
-    float tD = row["accD"];
-    float tE = row["accE"];
+  float tA = doc["accA"];
+  float tB = doc["accB"];
+  float tC = doc["accC"];
+  float tD = doc["accD"];
 
-    if (A > tA || B > tB || C > tC || D > tD || E > tE) {
-      Serial.println("🔔 ACC Trigger:");
-      Serial.println(String("accA: ") + tA + " accB: " + tB + " accC: " + tC);
-      return true;
-    }
+  if (A > tA || B > tB || C > tC || D > tD) {
+    Serial.println("🔥 ACC Threshold Triggered (Row 2)");
+    Serial.println(String("A=") + tA + " B=" + tB + " C=" + tC + " D=" + tD);
+    return true;
   }
+
   return false;
 }
+
 
 
 // ----------- SYNC THRESHOLD CHECK -------------
