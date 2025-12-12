@@ -17,12 +17,14 @@ Meaning, Tilt alone cannot separate fall from normal activity in dataset. so I c
 >Normal activity stays under 5g_
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Final Fall-Detection Threshold (Accurate for the Data)
-* A fall occurs when BOTH:
+## Final Fall-Detection Threshold (Accurate for the Data)
+### * A fall occurs when BOTH:
 ----- ACC (impact) > 6.0 g
 AND
 ----- Tilt > 60° after the impact
 (staying horizontal)
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Why This Works for Your Dataset
 *** Normal Activity:
