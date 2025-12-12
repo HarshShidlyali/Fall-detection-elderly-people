@@ -3,11 +3,10 @@
 
 ## RESULTS (Based on Actual Data)
 ### Tilt Angle Comparison
+<img width="334" height="94" alt="Screenshot from 2025-12-12 23-16-47" src="https://github.com/user-attachments/assets/14e72e84-2856-48b7-aaf5-742c410d2742" />
 
-Metric	     Fall Data	   Normal Data
-Tilt Mean	    61.39°	       59.32°
-Tilt Min	    45.00°	       45.00°
-Tilt Max	    89.99°        90.00°
+
+
 
 Note :- Tilt values overlap heavily
 Meaning: Tilt alone cannot separate fall from normal activity in dataset. so I computed acceleration magnitude.
