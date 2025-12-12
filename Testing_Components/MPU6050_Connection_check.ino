@@ -11,16 +11,14 @@ void setup() {
   while (!Serial) {
     delay(10); // Wait for serial port to connect
   }
-  
   Serial.println("MPU6050 Connection Test");
-  Serial.println("=======================");
   
   // Initialize I2C communication
   Wire.begin();
   
   // Try to initialize MPU6050
   if (!mpu.begin()) {
-    Serial.println("❌ Failed to find MPU6050 chip!");
+    Serial.println("Failed to find MPU6050 chip!");
     Serial.println("Please check the following:");
     Serial.println("1. Wiring connections (SDA, SCL, VCC, GND)");
     Serial.println("2. I2C address (try 0x68 or 0x69)");
@@ -33,8 +31,7 @@ void setup() {
       delay(1000);
     }
   }
-  
-  Serial.println("✅ MPU6050 Found!");
+  Serial.println("MPU6050 Found!");
   
   // Set accelerometer range
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
@@ -99,7 +96,7 @@ void setup() {
       break;
   }
   
-  Serial.println("\n✅ MPU6050 initialized successfully!");
+  Serial.println("\nMPU6050 initialized successfully!");
   delay(1000);
 }
 
@@ -144,7 +141,7 @@ void scanI2CDevices() {
       
       // Check if it's MPU6050
       if (address == 0x68 || address == 0x69) {
-        Serial.println("⚠️  This might be an MPU6050! Check your wiring.");
+        Serial.println("This might be an MPU6050! Check your wiring.");
       }
     }
   }
