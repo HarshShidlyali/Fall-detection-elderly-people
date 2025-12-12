@@ -3,7 +3,7 @@
 ### Working : 
 _The ESP32 continuously reads acceleration and body tilt values from the MPU6050 sensor. When both the impact (ACC) and tilt angle rise above their defined thresholds, the system suspects a fall and immediately enters a 5-second verification window. At that moment, a message is sent indicating a potential fall and giving time for cancellation. During these 5 seconds, the user has the option to press the cancel button—if the button is pressed, the system recognizes the event as a false alarm and no fall alert is sent. However, if the button is not pressed within the 5-second window, the system concludes that a real fall has occurred and automatically sends a final alert message stating “FALL DETECTED! Need urgent attention.”_
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-## * RESULTS (Based on Actual Data)
+## * RESULTS (Based on Dataset)
 ### Tilt Angle Comparison
 <img width="334" height="94" alt="Screenshot from 2025-12-12 23-16-47" src="https://github.com/user-attachments/assets/14e72e84-2856-48b7-aaf5-742c410d2742" />
 
