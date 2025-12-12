@@ -5,12 +5,12 @@
 #include <MPU6050.h>
 
 // ---------------- WiFi ----------------
-const char* ssid = "Shidlyali_F_Floor_2.4GHz";
-const char* password = "Shidlyali*2025#";
+const char* ssid = "******************";
+const char* password = "****************";
 
 // ---------------- Telegram Bot ----------------
-const String BOTtoken = "8584168475:AAG8lYazrM8mrz5qn5zw6HDJpW_7TeMYEzU";
-const String CHAT_ID = "1640526464";
+const String BOTtoken = "************************";
+const String CHAT_ID = "*********************";
 
 // ---------------- MPU6050 ----------------
 MPU6050 mpu;
