@@ -33,5 +33,5 @@ Meaning, Tilt alone cannot separate fall from normal activity in dataset. so I c
 > ACC spikes up to 14g
 > Tilt goes to ~90° afterward
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-FINAL FALL THRESHOLD (Derived from data set)
-**** ACC > 6g + Tilt > 60° = TRUE FALL
+## FINAL FALL THRESHOLD (Derived from data set)
+### **** ACC > 6g + Tilt > 60° = TRUE FALL
