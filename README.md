@@ -1,7 +1,7 @@
 ## This prototype Represents the Fall detection for the elderly people. In this, we used machine learning called TinyML which is used for low end end devices.Firstly, I took the predefined data set disitiguishing between the real fall dataset and the normal activity dataset.then I compared the data set i.e Real fall dataset and the normal activity dataset.and I computed the true tilt + acceleration differences, and now we can define the real FALL THRESHOLD.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-## RESULTS (Based on Actual Data)
+## * RESULTS (Based on Actual Data)
 ### Tilt Angle Comparison
 <img width="334" height="94" alt="Screenshot from 2025-12-12 23-16-47" src="https://github.com/user-attachments/assets/14e72e84-2856-48b7-aaf5-742c410d2742" />
 
