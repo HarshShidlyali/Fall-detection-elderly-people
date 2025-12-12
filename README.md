@@ -6,13 +6,13 @@
 <img width="334" height="94" alt="Screenshot from 2025-12-12 23-16-47" src="https://github.com/user-attachments/assets/14e72e84-2856-48b7-aaf5-742c410d2742" />
 
 _Note :- Tilt values overlap heavily
-Meaning: Tilt alone cannot separate fall from normal activity in dataset. so I computed acceleration magnitude._
+Meaning, Tilt alone cannot separate fall from normal activity in dataset. so I computed acceleration magnitude._
 
 ## * ACC Impact Values
 > Fall Data	: ACC Max	13.99 g
 > Normal Data : ACC Max 4.99 g
----- _Falls have huge spikes (≈ 14g) 
----- Normal activity stays under 5g_
+---- _Falls have huge spikes (≈ 14g)
+> Normal activity stays under 5g_
 
 Final Fall-Detection Threshold (Accurate for the Data)
 * A fall occurs when BOTH:
